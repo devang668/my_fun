@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>MP3 播放器</title>
+</head>
+<body>
+  <h1>MP3 文件列表</h1>
+  <input type="file" id="fileInput" multiple accept=".mp3">
+  <ul id="fileList"></ul>
+  <audio id="audioPlayer" controls></audio>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const audioPlayer = document.getElementById('audioPlayer');
+
+    fileInput.addEventListener('change', function(e) {
+      const files = Array.from(e.target.files);
+      fileList.innerHTML = '';
+
+      files.forEach(file => {
+        if (file.name.toLowerCase().endsWith('.mp3')) {
+          const li = document.createElement('li');
+          const link = document.createElement('a');
+          link.href = '#';
+          link.textContent = file.name;
+
+          link.addEventListener('click', () => {
+            const url = URL.createObjectURL(file);
+            audioPlayer.src = url;
+            audioPlayer.play();
+          });
+
+          li.appendChild(link);
+          fileList.appendChild(li);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

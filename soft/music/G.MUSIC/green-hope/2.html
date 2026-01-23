@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>MP3 播放器</title>
+</head>
+<body>
+  <h1>MP3 文件列表</h1>
+  <input type="file" id="fileInput" multiple accept=".mp3" webkitdirectory>
+  <button id="autoplayBtn">自动播放</button>
+  <ul id="fileList"></ul>
+  <audio id="audioPlayer" controls></audio>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const audioPlayer = document.getElementById('audioPlayer');
+    const autoplayBtn = document.getElementById('autoplayBtn');
+
+    let mp3Files = [];
+    let currentTrackIndex = 0;
+
+    fileInput.addEventListener('change', function(e) {
+      const files = Array.from(e.target.files);
+      // 过滤出所有MP3文件（包含子文件夹）
+      mp3Files = files.filter(file => file.name.toLowerCase().endsWith('.mp3'));
+      fileList.innerHTML = '';
+      
+      // 生成文件列表
+      mp3Files.forEach((file, index) => {
+        const li = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = '#';
+        link.textContent = file.name;
+        link.addEventListener('click', (event) => {
+          event.preventDefault();
+          playTrack(index);
+        });
+        li.appendChild(link);
+        fileList.appendChild(li);
+      });
+    });
+
+    // 播放指定索引的音轨
+    function playTrack(index) {
+      if (index >= 0 && index < mp3Files.length) {
+        const file = mp3Files[index];
+        const url = URL.createObjectURL(file);
+        audioPlayer.src = url;
+        audioPlayer.play();
+        currentTrackIndex = index;
+      }
+    }
+
+    // 自动播放按钮事件
+    autoplayBtn.addEventListener('click', () => {
+      if (mp3Files.length > 0) {
+        playTrack(0);
+      }
+    });
+
+    // 自动播放下一首
+    audioPlayer.addEventListener('ended', () => {
+      currentTrackIndex++;
+      if (currentTrackIndex < mp3Files.length) {
+        playTrack(currentTrackIndex);
+      }
+    });
+  </script>
+</body>
+</html>

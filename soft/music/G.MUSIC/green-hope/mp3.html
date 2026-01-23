@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>MP3 播放器</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      margin: 10px 0;
+    }
+
+    #autoplayBtn {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+
+    .folder-section {
+      margin: 15px 0;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .folder-title {
+      font-weight: bold;
+      padding: 5px 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+      color: #fff;
+      display: inline-block;
+    }
+
+    ul.file-list {
+      list-style: none;
+      padding-left: 0;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr); /* 固定双列 */
+      gap: 8px; /* 更紧凑的间距 */
+    }
+
+    ul.file-list li {
+      background: #fff;
+      padding: 6px 10px; /* 更紧凑的内边距 */
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: background 0.2s;
+    }
+
+    ul.file-list li:hover {
+      background-color: #e0e0e0;
+    }
+  </style>
+</head>
+<body>
+  <h1>MP3 播放器</h1>
+  <input type="file" id="fileInput" multiple accept=".mp3" webkitdirectory>
+  <div class="controls">
+    <button id="autoplayBtn">自动播放</button>
+  </div>
+  <div id="fileContainer"></div>
+  <audio id="audioPlayer" controls></audio>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const fileContainer = document.getElementById('fileContainer');
+    const audioPlayer = document.getElementById('audioPlayer');
+    const autoplayBtn = document.getElementById('autoplayBtn');
+
+    let mp3Files = [];
+    let currentTrackIndex = 0;
+
+    // 颜色池（浅色系）
+    const folderColors = [
+      "#f8bbd0", "#e1bee7", "#ce93d8", "#b39ddb", "#9fa8da",
+      "#90caf9", "#81d4fa", "#80deea", "#80cbc4", "#a5d6a7"
+    ];
+
+    fileInput.addEventListener('change', function(e) {
+      const files = Array.from(e.target.files);
+      const folderMap = {};
+      mp3Files = [];
+
+      // 按文件夹分组
+      files.forEach(file => {
+        if (!file.name.toLowerCase().endsWith('.mp3')) return;
+
+        const path = file.webkitRelativePath;
+        const folderName = getFolderName(path);
+
+        if (!folderMap[folderName]) {
+          folderMap[folderName] = [];
+        }
+        folderMap[folderName].push(file);
+      });
+
+      // 生成 UI
+      fileContainer.innerHTML = '';
+      const colorPool = [...folderColors];
+      Object.entries(folderMap).forEach(([folder, files], index) => {
+        const folderColor = colorPool[index % colorPool.length];
+
+        const section = document.createElement('div');
+        section.className = 'folder-section';
+        section.style.backgroundColor = folderColor;
+
+        const title = document.createElement('div');
+        title.className = 'folder-title';
+        title.textContent = folder;
+        section.appendChild(title);
+
+        const ul = document.createElement('ul');
+        ul.className = 'file-list';
+
+        files.forEach((file, idx) => {
+          const currentIndex = mp3Files.length; // 获取当前索引
+          const li = document.createElement('li');
+          li.textContent = file.name;
+          li.addEventListener('click', () => {
+            playTrack(currentIndex);
+          });
+          ul.appendChild(li);
+          mp3Files.push(file);
+        });
+
+        section.appendChild(ul);
+        fileContainer.appendChild(section);
+      });
+    });
+
+    function getFolderName(path) {
+      const parts = path.split('/');
+      return parts.length > 1 ? parts[1] : '未分类';
+    }
+
+    function playTrack(index) {
+      if (index >= 0 && index < mp3Files.length) {
+        const file = mp3Files[index];
+        const url = URL.createObjectURL(file);
+        audioPlayer.src = url;
+        audioPlayer.play();
+        currentTrackIndex = index;
+      }
+    }
+
+    autoplayBtn.addEventListener('click', () => {
+      if (mp3Files.length > 0) {
+        playTrack(0);
+      }
+    });
+
+    audioPlayer.addEventListener('ended', () => {
+      currentTrackIndex++;
+      if (currentTrackIndex < mp3Files.length) {
+        playTrack(currentTrackIndex);
+      }
+    });
+  </script>
+</body>
+</html>
