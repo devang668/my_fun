@@ -1,2 +1,20 @@
 # my_fun
 some enjoyable things
+
+
+
+
+
+![image-20260123150357378](./README/image-20260123150357378.png)
+
+![image-20260123150409517](./README/image-20260123150409517.png)
+
+![image-20260123150421200](./README/image-20260123150421200.png)
+
+![image-20260123150429881](./README/image-20260123150429881.png)
+
+使用git_helper驱动
+
+
+
+![image-20260123151301197](./README/image-20260123151301197.png)
