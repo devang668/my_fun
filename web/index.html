@@ -45,6 +45,24 @@
     outline: none;
   }
   .toolbar input:focus { border-color: var(--accent); }
+  nav {
+    max-width: 860px;
+    margin: 16px auto 0;
+    padding: 0 16px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  nav a {
+    text-decoration: none;
+    color: var(--accent);
+    background: #fff;
+    border: 1px solid var(--border);
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 14px;
+  }
+  nav a.active { background: var(--accent); color: #fff; border-color: var(--accent); }
   #error {
     max-width: 860px;
     margin: 20px auto;
@@ -123,6 +141,10 @@
   <h1>学习笔记</h1>
   <p>笔记来源：Bei-ming/note.md · 内容实时加载</p>
 </header>
+<nav>
+  <a href="/web/index.html" class="active">学习笔记（十三哥）</a>
+  <a href="/ielts/index.html">雅思口语</a>
+</nav>
 <div class="toolbar">
   <input type="text" id="search" placeholder="搜索笔记内容...">
 </div>

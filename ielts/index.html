@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>雅思口语笔记</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --text: #2c3e50;
+    --accent: #2f5d8c;
+    --border: #e3e6ea;
+    --quote-bg: #eef3f9;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+  }
+  header {
+    background: var(--accent);
+    color: #fff;
+    padding: 26px 20px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  }
+  header h1 { font-size: 25px; font-weight: 600; }
+  header p { opacity: 0.85; font-size: 14px; margin-top: 6px; }
+  nav {
+    max-width: 860px;
+    margin: 16px auto 0;
+    padding: 0 16px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  nav a {
+    text-decoration: none;
+    color: var(--accent);
+    background: #fff;
+    border: 1px solid var(--border);
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 14px;
+  }
+  nav a.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .toolbar {
+    max-width: 860px;
+    margin: 14px auto 0;
+    padding: 0 16px;
+    display: flex;
+    gap: 10px;
+  }
+  .toolbar input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 15px;
+    outline: none;
+  }
+  .toolbar input:focus { border-color: var(--accent); }
+  #error {
+    max-width: 860px;
+    margin: 20px auto;
+    padding: 14px 20px;
+    background: #fdecea;
+    color: #b3261e;
+    border-radius: 8px;
+    display: none;
+  }
+  main { max-width: 860px; margin: 18px auto 60px; padding: 0 16px; }
+  .section-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 26px 32px;
+    margin-bottom: 22px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .section-card h2 {
+    font-size: 21px;
+    margin: 0 0 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-card h2 .arrow {
+    font-size: 14px;
+    color: #999;
+    transition: transform 0.2s;
+    display: inline-block;
+  }
+  .section-card.collapsed .arrow { transform: rotate(-90deg); }
+  .section-card.collapsed .section-body { display: none; }
+  .section-body { margin-top: 12px; }
+  h3 {
+    font-size: 17px;
+    margin: 22px 0 8px;
+    padding: 10px 14px;
+    background: #f2f6fb;
+    border-left: 4px solid var(--accent);
+    border-radius: 0 8px 8px 0;
+  }
+  h3:first-child { margin-top: 6px; }
+  p { margin: 8px 0; }
+  ul { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  strong { color: #1e4266; }
+  blockquote {
+    margin: 12px 0;
+    padding: 10px 16px;
+    background: var(--quote-bg);
+    border-left: 4px solid #8fb3d9;
+    border-radius: 0 8px 8px 0;
+    color: #4c5b6b;
+    font-size: 15px;
+  }
+  footer { text-align: center; color: #999; font-size: 13px; margin: 40px 0 20px; }
+  @media (max-width: 600px) {
+    .section-card { padding: 18px; }
+    header h1 { font-size: 21px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>雅思口语笔记</h1>
+  <p>来源：ielts/notes.md · 内容实时加载</p>
+</header>
+<nav>
+  <a href="/web/index.html">学习笔记（十三哥）</a>
+  <a href="/ielts/index.html" class="active">雅思口语</a>
+</nav>
+<div class="toolbar">
+  <input type="text" id="search" placeholder="搜索题目、表达或回答...">
+</div>
+<div id="error"></div>
+<main id="app"><div class="section-card">加载中...</div></main>
+<footer>使用 marked.js 渲染 Markdown</footer>
+
+<script src="/web/marked.min.js"></script>
+<script>
+(async function () {
+  const errorBox = document.getElementById('error');
+  const app = document.getElementById('app');
+  const searchInput = document.getElementById('search');
+
+  marked.setOptions({ breaks: true, gfm: true });
+
+  let raw = '';
+  try {
+    const res = await fetch('/ielts/notes.md?t=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    raw = await res.text();
+    if (!raw.trim()) throw new Error('笔记内容为空');
+  } catch (e) {
+    app.innerHTML = '';
+    errorBox.style.display = 'block';
+    errorBox.textContent = '无法加载雅思笔记：' + e.message +
+      '（请通过本地服务器或预览地址访问）';
+    return;
+  }
+
+  const blocks = [];
+  let current = null;
+  let intro = [];
+  for (const line of raw.split('\n')) {
+    if (/^## /.test(line)) {
+      if (current) blocks.push(current);
+      current = { title: line.replace(/^##\s*/, ''), lines: [] };
+    } else if (/^# /.test(line)) {
+      continue;
+    } else if (current) {
+      current.lines.push(line);
+    } else {
+      intro.push(line);
+    }
+  }
+  if (current) blocks.push(current);
+
+  function render(filter) {
+    app.innerHTML = '';
+    const f = (filter || '').toLowerCase();
+    const matched = blocks
+      .map(b => ({ title: b.title, text: b.lines.join('\n') }))
+      .filter(b => !f || (b.title + b.text).toLowerCase().includes(f));
+
+    if (matched.length === 0) {
+      app.innerHTML = '<div class="section-card">没有匹配的内容</div>';
+      return;
+    }
+
+    for (const b of matched) {
+      const card = document.createElement('div');
+      card.className = 'section-card';
+      const h2 = document.createElement('h2');
+      h2.innerHTML = '<span class="arrow">▼</span>' +
+        marked.parse(b.title).replace(/^<p>|<\/p>$/g, '');
+      const body = document.createElement('div');
+      body.className = 'section-body';
+      body.innerHTML = marked.parse(b.text);
+      h2.addEventListener('click', () => card.classList.toggle('collapsed'));
+      card.appendChild(h2);
+      card.appendChild(body);
+      app.appendChild(card);
+    }
+  }
+
+  searchInput.addEventListener('input', e => render(e.target.value));
+  render('');
+})();
+</script>
+</body>
+</html>
