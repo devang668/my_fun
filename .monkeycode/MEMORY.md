@@ -90,3 +90,11 @@ This file records user instructions, preferences, and teachings for reference in
   - 依赖：`numpy>=1.24`、`Pillow>=10.0`，已用 `pip install --break-system-packages` 装好；缺 CJK 字体时水墨技能会跳过标题与印章。
   - GitHub API 在该环境返回 403，github-download 的 `download.sh` 会因探测分支失败而静默退出；改用 `git clone --depth 1` 下载。
   - 非技能项目放在 `/workspace/arts/shan-shui-inf`、`/workspace/tools/svg-mcp`，两者已加入 .gitignore。
+
+[Project Knowledge Summary]
+- Date: 2026-11-20
+- Context: Discovered by Agent while building the skill registry page
+- Category: Workflow & Collaboration
+- Instructions:
+  - 安装/卸载技能后运行 `python3 skills/build_registry.py` 重新生成 `skills/registry.json`，技能页 `/skills/index.html` 会自动读取并展示。
+  - 页面入口：`/skills/index.html`（技能登记 + self-check 说明）、`/self-check.html`（自检报告）。
