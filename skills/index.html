@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>项目技能 · self-check</title>
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --card: #ffffff;
+    --text: #2c3e50;
+    --accent: #4a5568;
+    --border: #e3e6ea;
+    --quote-bg: #f1f3f6;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.8;
+  }
+  header {
+    background: var(--accent);
+    color: #fff;
+    padding: 26px 20px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  }
+  header h1 { font-size: 25px; font-weight: 600; }
+  header p { opacity: 0.85; font-size: 14px; margin-top: 6px; }
+  nav {
+    max-width: 860px;
+    margin: 16px auto 0;
+    padding: 0 16px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  nav a {
+    text-decoration: none;
+    color: var(--accent);
+    background: #fff;
+    border: 1px solid var(--border);
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 14px;
+  }
+  nav a.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  main { max-width: 860px; margin: 18px auto 60px; padding: 0 16px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 26px 32px;
+    margin-bottom: 18px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .badge {
+    display: inline-block;
+    font-size: 12px;
+    color: #2f7d4f;
+    background: #e8f5ec;
+    border-radius: 999px;
+    padding: 3px 10px;
+    margin-bottom: 10px;
+  }
+  h1 { font-size: 24px; margin-bottom: 8px; }
+  h2 { font-size: 19px; margin: 24px 0 10px; padding-bottom: 6px; border-bottom: 2px solid #dfe4ea; }
+  h3 { font-size: 16px; margin: 18px 0 8px; color: #3a4654; }
+  p { margin: 8px 0; }
+  ul { margin: 8px 0 8px 22px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 12px 0; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eef1f4; }
+  th { background: #f7f9fb; font-weight: 600; font-size: 13px; color: #5a6876; }
+  code {
+    background: #eef1f5;
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+  }
+  pre {
+    background: #22303d;
+    color: #e6edf3;
+    padding: 14px 16px;
+    border-radius: 10px;
+    overflow-x: auto;
+    margin: 12px 0;
+  }
+  pre code { background: none; color: inherit; padding: 0; }
+  blockquote {
+    margin: 12px 0;
+    padding: 10px 16px;
+    background: var(--quote-bg);
+    border-left: 4px solid #b7c1cc;
+    border-radius: 0 8px 8px 0;
+    color: #4c5b6b;
+    font-size: 15px;
+  }
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+  .actions a {
+    text-decoration: none;
+    font-size: 14px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    background: #fff;
+  }
+  .actions a.primary { background: var(--accent); color: #fff; }
+  #error { display: none; color: #b3261e; background: #fdecea; padding: 14px 18px; border-radius: 8px; }
+  footer { text-align: center; color: #999; font-size: 13px; margin: 40px 0 20px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>项目技能</h1>
+  <p>来源：.opencode/skills/self-check/SKILL.md</p>
+</header>
+<nav>
+  <a href="/skills/index.html" class="active">项目技能</a>
+  <a href="/web/index.html">学习笔记（十三哥）</a>
+  <a href="/ielts/index.html">雅思口语</a>
+  <a href="/self-check.html">自检报告</a>
+</nav>
+<main>
+  <div class="card">
+    <span class="badge">已安装技能</span>
+    <div class="actions">
+      <a class="primary" href="/self-check.html">打开自检报告</a>
+      <a href="/api/note?path=.opencode%2Fskills%2Fself-check%2FSKILL.md" target="_blank">查看 SKILL.md 原文</a>
+    </div>
+  </div>
+  <div class="card" id="content">加载中...</div>
+  <div id="error"></div>
+</main>
+<footer id="footer">使用 marked.js 渲染 Markdown</footer>
+
+<script>
+(function () {
+  const SKILL_PATH = '.opencode/skills/self-check/SKILL.md';
+  const CONTENT = document.getElementById('content');
+  const ERROR = document.getElementById('error');
+  const FOOTER = document.getElementById('footer');
+  let version = 'dev';
+
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = resolve;
+      script.onerror = () => reject(new Error('资源加载失败: ' + src));
+      document.body.appendChild(script);
+    });
+  }
+
+  async function boot() {
+    try {
+      const res = await fetch('/api/version?path=' + encodeURIComponent(SKILL_PATH) +
+        '&t=' + Date.now(), { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.version) version = data.version;
+      }
+    } catch (e) {
+      version = 'dev';
+    }
+
+    FOOTER.textContent = '版本 v' + version + ' · 使用 marked.js 渲染 Markdown';
+
+    try {
+      await loadScript('/web/marked.min.js?v=' + encodeURIComponent(version));
+      marked.setOptions({ breaks: true, gfm: true });
+    } catch (e) {
+      ERROR.style.display = 'block';
+      ERROR.textContent = '渲染库加载失败，请刷新重试';
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/note?path=' + encodeURIComponent(SKILL_PATH) +
+        '&v=' + encodeURIComponent(version), { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      const body = (data.content || '').replace(/^---[\s\S]*?---\s*/, '');
+      CONTENT.innerHTML = marked.parse(body);
+    } catch (e) {
+      CONTENT.style.display = 'none';
+      ERROR.style.display = 'block';
+      ERROR.textContent = '无法加载技能说明：' + e.message;
+    }
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>

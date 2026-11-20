@@ -43,3 +43,12 @@ This file records user instructions, preferences, and teachings for reference in
   - 服务端口固定 8000；修改 server.py 后需重启后台终端才生效。
   - 页面入口：/web/index.html（学习笔记）、/ielts/index.html（雅思口语）。
   - server.py 中的 admin/123456 仅为本地预览用的演示账号，不能用于生产环境。
+[Project Knowledge Summary]
+- Date: 2026-11-20
+- Context: Discovered by Agent while installing the self-check skill into the project
+- Category: Operations & Deployment
+- Instructions:
+  - 项目技能安装于 `.opencode/skills/self-check/`，入口页为 `/skills/index.html`，自检报告页为 `/self-check.html`。
+  - 扫描命令：`python3 .opencode/skills/self-check/scripts/selfcheck_scan.py`；报告服务器：`python3 .opencode/skills/self-check/scripts/serve_report.py --port 8930 --dir /workspace`。
+  - 扫描会跳过 8930 和 >=32768 的动态端口，避免把临时端口计入服务清单。
+  - 新增 opencode 技能或修改 `.opencode/` 下的文件后，需要重启 opencode 才能加载。

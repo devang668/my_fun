@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>服务自检报告</title>
+<style>
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f6f8; color: #22303d; margin: 0; padding: 28px 16px; }
+  .wrap { max-width: 760px; margin: 0 auto; background: #fff; border: 1px solid #e3e6ea; border-radius: 12px; padding: 24px 28px; }
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  .meta { color: #6b7a8c; font-size: 13px; margin-bottom: 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid #eef1f4; }
+  th { color: #6b7a8c; font-weight: 600; font-size: 13px; }
+  td.ok { color: #2f7d4f; }
+  td.bad { color: #b3261e; }
+  .summary { margin-top: 18px; font-size: 14px; line-height: 1.9; color: #3c4a58; }
+  a { color: #2f5d8c; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>服务自检报告</h1>
+  <div class="meta">生成时间 2026-11-20 04:27:17 · 容器运行 0.3 天 · 共 2 项</div>
+  <table>
+    <thead><tr><th>端口</th><th>服务</th><th>状态</th></tr></thead>
+    <tbody>
+      <tr><td>4096</td><td>服务 4096</td><td class="ok">正常 (HTTP 200)</td></tr>
+      <tr><td>8000</td><td>服务 8000</td><td class="ok">正常 (HTTP 200)</td></tr>
+    </tbody>
+  </table>
+  <div class="summary">本次扫描 2 项：正常 2 项，无响应 0 项；新增 0 项，移除 0 项。</div>
+</div>
+</body>
+</html>

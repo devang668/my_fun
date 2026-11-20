@@ -10,6 +10,7 @@ ROOT = os.path.dirname(os.path.abspath(__file__))
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "123456"
 ALLOWED_FILES = {"ielts/notes.md", "Bei-ming/note.md"}
+READABLE_FILES = ALLOWED_FILES | {".opencode/skills/self-check/SKILL.md"}
 TOKENS = set()
 
 
@@ -45,8 +46,8 @@ class Handler(SimpleHTTPRequestHandler):
             return False
         return header[7:].strip() in TOKENS
 
-    def _target_path(self, rel):
-        if rel not in ALLOWED_FILES:
+    def _target_path(self, rel, allowed=None):
+        if rel not in (allowed or ALLOWED_FILES):
             return None
         full = os.path.normpath(os.path.join(ROOT, rel))
         if not full.startswith(ROOT + os.sep):
@@ -111,7 +112,7 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith("/api/version"):
             rel = self._query_path("ielts/notes.md")
-            full = self._target_path(rel)
+            full = self._target_path(rel, READABLE_FILES)
             if full is None or not os.path.isfile(full):
                 json_response(self, 404, {"error": "文件不存在"})
                 return
@@ -133,7 +134,7 @@ class Handler(SimpleHTTPRequestHandler):
             return
         if self.path.startswith("/api/note"):
             rel = self._query_path("ielts/notes.md")
-            full = self._target_path(rel)
+            full = self._target_path(rel, READABLE_FILES)
             if full is None or not os.path.isfile(full):
                 json_response(self, 404, {"error": "文件不存在"})
                 return
