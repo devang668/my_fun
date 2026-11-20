@@ -2,3 +2,5 @@
 .monkeycode-tmp-files/
 __pycache__/
 *.pyc
+arts/
+tools/

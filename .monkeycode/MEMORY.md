@@ -79,3 +79,14 @@ This file records user instructions, preferences, and teachings for reference in
   - SkillHub 会按命名空间安装到 `.opencode/skills/<namespace>/<slug>`，opencode 需要扁平目录，安装后把 `<slug>` 移动到 `.opencode/skills/` 根下并删掉空命名空间目录。
   - github-download 技能位于 `.opencode/skills/github-download/`：Linux 用 `scripts/download.sh <user/repo> [输出目录]`，技能装用 `scripts/install.sh`，Windows 用对应 `.ps1`。
   - 该技能默认把下载结果放在当前目录，下载大仓库（>50MB）时会回退 `git clone --depth 1`。
+
+[Project Knowledge Summary]
+- Date: 2026-11-20
+- Context: Discovered by Agent while installing art/creative skills from GitHub via github-download
+- Category: Environment Configuration
+- Instructions:
+  - 第三方技能统一装到 `/root/.claude/skills/<name>/`（opencode 会自动加载外部技能），避免把大体积仓库提交进 git。
+  - 已安装：claude-drawing、ink-wash-restyle、watercolor-svg、procedural-painting、procedural-realism、procedural-terrain-art。
+  - 依赖：`numpy>=1.24`、`Pillow>=10.0`，已用 `pip install --break-system-packages` 装好；缺 CJK 字体时水墨技能会跳过标题与印章。
+  - GitHub API 在该环境返回 403，github-download 的 `download.sh` 会因探测分支失败而静默退出；改用 `git clone --depth 1` 下载。
+  - 非技能项目放在 `/workspace/arts/shan-shui-inf`、`/workspace/tools/svg-mcp`，两者已加入 .gitignore。
