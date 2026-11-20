@@ -230,7 +230,7 @@
   </div>
   <div id="app"><div class="section-card">加载中...</div></div>
 </main>
-<footer>使用 marked.js 渲染 Markdown</footer>
+<footer id="footer">使用 marked.js 渲染 Markdown</footer>
 
 <div class="modal-mask" id="loginMask">
   <div class="modal">
@@ -249,10 +249,10 @@
 
 <div id="toast"></div>
 
-<script src="/web/marked.min.js"></script>
 <script>
 (function () {
   const NOTE_PATH = 'ielts/notes.md';
+  const FALLBACK_VERSION = 'dev';
   const app = document.getElementById('app');
   const errorBox = document.getElementById('error');
   const searchInput = document.getElementById('search');
@@ -270,8 +270,20 @@
   const loginSubmit = document.getElementById('loginSubmit');
   const loginCancel = document.getElementById('loginCancel');
   const toastEl = document.getElementById('toast');
+  const footerEl = document.getElementById('footer');
 
-  marked.setOptions({ breaks: true, gfm: true });
+  let noteVersion = FALLBACK_VERSION;
+  let markedReady = null;
+
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = resolve;
+      script.onerror = () => reject(new Error('资源加载失败: ' + src));
+      document.body.appendChild(script);
+    });
+  }
 
   let blocks = [];
   let rawMarkdown = '';
@@ -348,7 +360,7 @@
   async function loadNote() {
     clearError();
     try {
-      const res = await fetch('/api/note?path=' + encodeURIComponent(NOTE_PATH) + '&t=' + Date.now(), { cache: 'no-store' });
+      const res = await fetch('/api/note?path=' + encodeURIComponent(NOTE_PATH) + '&v=' + encodeURIComponent(noteVersion), { cache: 'no-store' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
       rawMarkdown = data.content || '';
@@ -489,8 +501,32 @@
 
   searchInput.addEventListener('input', e => render(e.target.value));
 
-  syncAuthUI();
-  loadNote();
+  async function boot() {
+    try {
+      const res = await fetch('/api/version?t=' + Date.now(), { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.version) noteVersion = data.version;
+      }
+    } catch (e) {
+      noteVersion = FALLBACK_VERSION;
+    }
+
+    footerEl.textContent = '版本 v' + noteVersion + ' · 使用 marked.js 渲染 Markdown';
+
+    try {
+      await loadScript('/web/marked.min.js?v=' + encodeURIComponent(noteVersion));
+      marked.setOptions({ breaks: true, gfm: true });
+    } catch (e) {
+      showError('渲染库加载失败，请刷新重试');
+      return;
+    }
+
+    syncAuthUI();
+    loadNote();
+  }
+
+  boot();
 })();
 </script>
 </body>

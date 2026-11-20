@@ -1,5 +1,6 @@
 import json
 import os
+import time
 import posixpath
 import secrets
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -98,14 +99,40 @@ class Handler(SimpleHTTPRequestHandler):
             return
         json_response(self, 200, {"ok": True, "bytes": len(content.encode("utf-8"))})
 
+    def _query_path(self, default):
+        if "?" not in self.path:
+            return default
+        query = self.path.split("?", 1)[1]
+        for pair in query.split("&"):
+            if pair.startswith("path="):
+                return unquote(pair[5:])
+        return default
+
     def do_GET(self):
+        if self.path.startswith("/api/version"):
+            rel = self._query_path("ielts/notes.md")
+            full = self._target_path(rel)
+            if full is None or not os.path.isfile(full):
+                json_response(self, 404, {"error": "文件不存在"})
+                return
+            stat = os.stat(full)
+            version = "%s-%d" % (
+                time.strftime("%y%m%d-%H%M%S", time.localtime(stat.st_mtime)),
+                stat.st_size,
+            )
+            json_response(
+                self,
+                200,
+                {
+                    "version": version,
+                    "file": rel,
+                    "mtime": int(stat.st_mtime),
+                    "size": stat.st_size,
+                },
+            )
+            return
         if self.path.startswith("/api/note"):
-            rel = "ielts/notes.md"
-            if "?" in self.path:
-                query = self.path.split("?", 1)[1]
-                for pair in query.split("&"):
-                    if pair.startswith("path="):
-                        rel = unquote(pair[5:])
+            rel = self._query_path("ielts/notes.md")
             full = self._target_path(rel)
             if full is None or not os.path.isfile(full):
                 json_response(self, 404, {"error": "文件不存在"})

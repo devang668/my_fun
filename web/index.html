@@ -152,60 +152,60 @@
 <main id="app">
   <div class="content" id="content">加载中...</div>
 </main>
-<footer>使用 marked.js 渲染 Markdown</footer>
+<footer id="footer">使用 marked.js 渲染 Markdown</footer>
 
-<script src="marked.min.js"></script>
 <script>
-(async function () {
+(function () {
+  const NOTE_PATH = 'Bei-ming/note.md';
+  const FALLBACK_VERSION = 'dev';
   const errorBox = document.getElementById('error');
-  const contentEl = document.getElementById('content');
   const app = document.getElementById('app');
   const searchInput = document.getElementById('search');
+  const footerEl = document.getElementById('footer');
 
-  marked.setOptions({ breaks: true, gfm: true });
-
+  let noteVersion = FALLBACK_VERSION;
   let rawMarkdown = '';
-  try {
-    const res = await fetch('../Bei-ming/note.md?t=' + Date.now());
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    rawMarkdown = await res.text();
-    if (!rawMarkdown.trim()) throw new Error('笔记内容为空');
-  } catch (e) {
-    contentEl.style.display = 'none';
-    errorBox.style.display = 'block';
-    errorBox.textContent = '无法加载笔记：' + e.message +
-      '（请通过本地服务器访问本页面，直接双击打开会因浏览器安全策略无法读取文件）';
-    return;
+  let blocks = [];
+
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = resolve;
+      script.onerror = () => reject(new Error('资源加载失败: ' + src));
+      document.body.appendChild(script);
+    });
   }
 
-  // 按二级标题拆分为独立卡片
-  const lines = rawMarkdown.split('\n');
-  const blocks = [];
-  let current = null;
-  let docTitle = '';
-  for (const line of lines) {
-    if (/^# /.test(line) && !docTitle) {
-      docTitle = line.replace(/^#\s*/, '');
-      continue;
+  function splitBlocks(text) {
+    const result = [];
+    let current = null;
+    for (const line of text.split('\n')) {
+      if (/^## /.test(line)) {
+        if (current) result.push(current);
+        current = { title: line.replace(/^##\s*/, ''), lines: [] };
+      } else if (/^# /.test(line)) {
+        continue;
+      } else if (current) {
+        current.lines.push(line);
+      }
     }
-    if (/^## /.test(line)) {
-      if (current) blocks.push(current);
-      current = { title: line.replace(/^##\s*/, ''), lines: [] };
-    } else if (current) {
-      current.lines.push(line);
-    }
+    if (current) result.push(current);
+    return result;
   }
-  if (current) blocks.push(current);
 
   function render(filter) {
     app.innerHTML = '';
     const f = (filter || '').toLowerCase();
-    const matched = blocks.map(b => ({ ...b, text: b.lines.join('\n') }))
+    const matched = blocks
+      .map(b => ({ title: b.title, text: b.lines.join('\n') }))
       .filter(b => !f || (b.title + b.text).toLowerCase().includes(f));
+
     if (matched.length === 0) {
-      app.innerHTML = '<div class="content">没有匹配的笔记内容</div>';
+      app.innerHTML = '<div class="section-card">没有匹配的笔记内容</div>';
       return;
     }
+
     for (const b of matched) {
       const card = document.createElement('div');
       card.className = 'section-card';
@@ -214,7 +214,7 @@
         marked.parse(b.title).replace(/^<p>|<\/p>$/g, '');
       const body = document.createElement('div');
       body.className = 'section-body';
-      body.innerHTML = marked.parse(b.lines.join('\n'));
+      body.innerHTML = marked.parse(b.text);
       h2.addEventListener('click', () => card.classList.toggle('collapsed'));
       card.appendChild(h2);
       card.appendChild(body);
@@ -222,8 +222,52 @@
     }
   }
 
-  searchInput.addEventListener('input', e => render(e.target.value));
-  render('');
+  async function loadNote() {
+    errorBox.style.display = 'none';
+    try {
+      const res = await fetch('/api/note?path=' + encodeURIComponent(NOTE_PATH) +
+        '&v=' + encodeURIComponent(noteVersion), { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      rawMarkdown = data.content || '';
+      if (!rawMarkdown.trim()) throw new Error('笔记内容为空');
+      blocks = splitBlocks(rawMarkdown);
+      render(searchInput.value);
+    } catch (e) {
+      app.innerHTML = '';
+      errorBox.style.display = 'block';
+      errorBox.textContent = '无法加载笔记：' + e.message;
+    }
+  }
+
+  async function boot() {
+    try {
+      const res = await fetch('/api/version?path=' + encodeURIComponent(NOTE_PATH) +
+        '&t=' + Date.now(), { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.version) noteVersion = data.version;
+      }
+    } catch (e) {
+      noteVersion = FALLBACK_VERSION;
+    }
+
+    footerEl.textContent = '版本 v' + noteVersion + ' · 使用 marked.js 渲染 Markdown';
+
+    try {
+      await loadScript('/web/marked.min.js?v=' + encodeURIComponent(noteVersion));
+      marked.setOptions({ breaks: true, gfm: true });
+    } catch (e) {
+      errorBox.style.display = 'block';
+      errorBox.textContent = '渲染库加载失败，请刷新重试';
+      return;
+    }
+
+    searchInput.addEventListener('input', e => render(e.target.value));
+    loadNote();
+  }
+
+  boot();
 })();
 </script>
 </body>
