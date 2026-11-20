@@ -52,3 +52,11 @@ This file records user instructions, preferences, and teachings for reference in
   - 扫描命令：`python3 .opencode/skills/self-check/scripts/selfcheck_scan.py`；报告服务器：`python3 .opencode/skills/self-check/scripts/serve_report.py --port 8930 --dir /workspace`。
   - 扫描会跳过 8930 和 >=32768 的动态端口，避免把临时端口计入服务清单。
   - 新增 opencode 技能或修改 `.opencode/` 下的文件后，需要重启 opencode 才能加载。
+
+[Project Knowledge Summary]
+- Date: 2026-11-20
+- Context: Discovered by Agent while mirroring the self-check skill to the platform skill directory
+- Category: Environment Configuration
+- Instructions:
+  - 平台级技能目录为 `/root/.codingmatrix/project-tpl/.ai-ready/skills/<name>/`，每个技能含 `SKILL.md`、可选 `scripts/`，以及 `.agent-resource-version` 版本标记文件。
+  - self-check 技能已同时安装到平台目录，脚本路径为 `/root/.codingmatrix/project-tpl/.ai-ready/skills/self-check/scripts/`。
