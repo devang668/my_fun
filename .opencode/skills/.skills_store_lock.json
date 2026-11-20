@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "skills": {
+    "find-skills": {
+      "name": "技能发现·Find Skills",
+      "zip_url": "https://api.skillhub.cn/api/v1/download?slug=find-skills",
+      "source": "community",
+      "version": "1.7.0",
+      "installedAt": "2026-11-20T04:39:04Z"
+    },
+    "skillhub-preference": {
+      "name": "Skillhub Preference",
+      "zip_url": "https://api.skillhub.cn/api/v1/download?slug=skillhub-preference",
+      "source": "community",
+      "version": "1.0.0",
+      "installedAt": "2026-11-20T04:39:05Z"
+    }
+  }
+}

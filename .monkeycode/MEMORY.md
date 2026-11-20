@@ -60,3 +60,13 @@ This file records user instructions, preferences, and teachings for reference in
 - Instructions:
   - 平台级技能目录为 `/root/.codingmatrix/project-tpl/.ai-ready/skills/<name>/`，每个技能含 `SKILL.md`、可选 `scripts/`，以及 `.agent-resource-version` 版本标记文件。
   - self-check 技能已同时安装到平台目录，脚本路径为 `/root/.codingmatrix/project-tpl/.ai-ready/skills/self-check/scripts/`。
+
+[User Instruction Summary]
+- Date: 2026-11-20
+- Context: 用户要求安装 SkillHub 商店并确认设为优先技能安装源
+- Category: Environment Configuration
+- Instructions:
+  - SkillHub CLI 已安装于 `/root/.local/bin/skillhub`（版本 2026.8.5），PATH 需包含 `/root/.local/bin`。
+  - 已确认将 SkillHub 设为优先技能安装源：技能搜索/安装/升级时优先 `skillhub`，不可用或无匹配再回退 `clawhub`，安装前先汇总来源、版本与风险供用户确认。
+  - 项目技能目录为 `/workspace/.opencode/skills`，安装命令示例：`skillhub install <name> --dir /workspace/.opencode/skills`。
+  - 已安装技能：`find-skills`、`skillhub-preference`（另有本地 self-check）。
