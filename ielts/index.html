@@ -53,16 +53,31 @@
     padding: 0 16px;
     display: flex;
     gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
   }
-  .toolbar input {
+  .toolbar input[type="text"] {
     flex: 1;
+    min-width: 180px;
     padding: 10px 14px;
     border: 1px solid var(--border);
     border-radius: 8px;
     font-size: 15px;
     outline: none;
   }
-  .toolbar input:focus { border-color: var(--accent); }
+  .toolbar input[type="text"]:focus { border-color: var(--accent); }
+  .btn {
+    padding: 9px 16px;
+    border: 1px solid var(--accent);
+    background: #fff;
+    color: var(--accent);
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .btn.primary { background: var(--accent); color: #fff; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .who { font-size: 13px; color: #6b7a8c; }
   #error {
     max-width: 860px;
     margin: 20px auto;
@@ -72,6 +87,22 @@
     border-radius: 8px;
     display: none;
   }
+  #toast {
+    position: fixed;
+    left: 50%;
+    bottom: 32px;
+    transform: translateX(-50%);
+    background: #2c3e50;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.25s;
+    pointer-events: none;
+    z-index: 60;
+  }
+  #toast.show { opacity: 1; }
   main { max-width: 860px; margin: 18px auto 60px; padding: 0 16px; }
   .section-card {
     background: var(--card);
@@ -120,6 +151,52 @@
     color: #4c5b6b;
     font-size: 15px;
   }
+  .editor-wrap { display: none; }
+  .editor-wrap.active { display: block; }
+  .editor-wrap textarea {
+    width: 100%;
+    min-height: 60vh;
+    padding: 18px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 14px;
+    line-height: 1.7;
+    resize: vertical;
+    outline: none;
+  }
+  .editor-wrap textarea:focus { border-color: var(--accent); }
+  .editor-actions { display: flex; gap: 10px; margin-bottom: 12px; }
+  .modal-mask {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(20,30,40,0.45);
+    align-items: center;
+    justify-content: center;
+    z-index: 80;
+  }
+  .modal-mask.active { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: 14px;
+    padding: 26px 26px 20px;
+    width: 320px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+  }
+  .modal h3 { margin: 0 0 14px; padding: 0; background: none; border: none; font-size: 18px; }
+  .modal label { display: block; font-size: 13px; color: #6b7a8c; margin: 10px 0 4px; }
+  .modal input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    outline: none;
+  }
+  .modal input:focus { border-color: var(--accent); }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+  .modal-error { color: #b3261e; font-size: 13px; min-height: 18px; margin-top: 8px; }
   footer { text-align: center; color: #999; font-size: 13px; margin: 40px 0 20px; }
   @media (max-width: 600px) {
     .section-card { padding: 18px; }
@@ -138,50 +215,107 @@
 </nav>
 <div class="toolbar">
   <input type="text" id="search" placeholder="搜索题目、表达或回答...">
+  <span class="who" id="who"></span>
+  <button class="btn" id="loginBtn">登录</button>
+  <button class="btn" id="editBtn" disabled>编辑</button>
 </div>
 <div id="error"></div>
-<main id="app"><div class="section-card">加载中...</div></main>
+<main>
+  <div class="editor-wrap" id="editorWrap">
+    <div class="editor-actions">
+      <button class="btn primary" id="saveBtn">保存</button>
+      <button class="btn" id="cancelBtn">取消</button>
+    </div>
+    <textarea id="editor" spellcheck="false"></textarea>
+  </div>
+  <div id="app"><div class="section-card">加载中...</div></div>
+</main>
 <footer>使用 marked.js 渲染 Markdown</footer>
+
+<div class="modal-mask" id="loginMask">
+  <div class="modal">
+    <h3>管理员登录</h3>
+    <label for="username">用户名</label>
+    <input type="text" id="username" autocomplete="username">
+    <label for="password">密码</label>
+    <input type="password" id="password" autocomplete="current-password">
+    <div class="modal-error" id="loginError"></div>
+    <div class="modal-actions">
+      <button class="btn" id="loginCancel">取消</button>
+      <button class="btn primary" id="loginSubmit">登录</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
 
 <script src="/web/marked.min.js"></script>
 <script>
-(async function () {
-  const errorBox = document.getElementById('error');
+(function () {
+  const NOTE_PATH = 'ielts/notes.md';
   const app = document.getElementById('app');
+  const errorBox = document.getElementById('error');
   const searchInput = document.getElementById('search');
+  const loginBtn = document.getElementById('loginBtn');
+  const editBtn = document.getElementById('editBtn');
+  const whoEl = document.getElementById('who');
+  const editorWrap = document.getElementById('editorWrap');
+  const editor = document.getElementById('editor');
+  const saveBtn = document.getElementById('saveBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const loginMask = document.getElementById('loginMask');
+  const usernameEl = document.getElementById('username');
+  const passwordEl = document.getElementById('password');
+  const loginError = document.getElementById('loginError');
+  const loginSubmit = document.getElementById('loginSubmit');
+  const loginCancel = document.getElementById('loginCancel');
+  const toastEl = document.getElementById('toast');
 
   marked.setOptions({ breaks: true, gfm: true });
 
-  let raw = '';
-  try {
-    const res = await fetch('/ielts/notes.md?t=' + Date.now(), { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    raw = await res.text();
-    if (!raw.trim()) throw new Error('笔记内容为空');
-  } catch (e) {
-    app.innerHTML = '';
-    errorBox.style.display = 'block';
-    errorBox.textContent = '无法加载雅思笔记：' + e.message +
-      '（请通过本地服务器或预览地址访问）';
-    return;
+  let blocks = [];
+  let rawMarkdown = '';
+  let editing = false;
+
+  const token = {
+    get() { return sessionStorage.getItem('ielts_token') || ''; },
+    set(value) { sessionStorage.setItem('ielts_token', value); },
+    clear() { sessionStorage.removeItem('ielts_token'); }
+  };
+
+  function toast(message) {
+    toastEl.textContent = message;
+    toastEl.classList.add('show');
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => toastEl.classList.remove('show'), 2200);
   }
 
-  const blocks = [];
-  let current = null;
-  let intro = [];
-  for (const line of raw.split('\n')) {
-    if (/^## /.test(line)) {
-      if (current) blocks.push(current);
-      current = { title: line.replace(/^##\s*/, ''), lines: [] };
-    } else if (/^# /.test(line)) {
-      continue;
-    } else if (current) {
-      current.lines.push(line);
-    } else {
-      intro.push(line);
-    }
+  function showError(message) {
+    errorBox.style.display = 'block';
+    errorBox.textContent = message;
   }
-  if (current) blocks.push(current);
+
+  function clearError() {
+    errorBox.style.display = 'none';
+    errorBox.textContent = '';
+  }
+
+  function splitBlocks(text) {
+    const result = [];
+    let current = null;
+    for (const line of text.split('\n')) {
+      if (/^## /.test(line)) {
+        if (current) result.push(current);
+        current = { title: line.replace(/^##\s*/, ''), lines: [] };
+      } else if (/^# /.test(line)) {
+        continue;
+      } else if (current) {
+        current.lines.push(line);
+      }
+    }
+    if (current) result.push(current);
+    return result;
+  }
 
   function render(filter) {
     app.innerHTML = '';
@@ -211,8 +345,152 @@
     }
   }
 
+  async function loadNote() {
+    clearError();
+    try {
+      const res = await fetch('/api/note?path=' + encodeURIComponent(NOTE_PATH) + '&t=' + Date.now(), { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      rawMarkdown = data.content || '';
+      blocks = splitBlocks(rawMarkdown);
+      render(searchInput.value);
+    } catch (e) {
+      app.innerHTML = '';
+      showError('无法加载雅思笔记：' + e.message);
+    }
+  }
+
+  function syncAuthUI() {
+    const loggedIn = !!token.get();
+    whoEl.textContent = loggedIn ? '已登录：admin' : '';
+    loginBtn.textContent = loggedIn ? '退出' : '登录';
+    loginBtn.classList.toggle('primary', !loggedIn);
+    editBtn.disabled = !loggedIn;
+    if (!loggedIn && editing) exitEdit();
+  }
+
+  function enterEdit() {
+    editing = true;
+    editor.value = rawMarkdown;
+    editorWrap.classList.add('active');
+    app.style.display = 'none';
+    editBtn.textContent = '编辑中';
+    editBtn.disabled = true;
+    searchInput.disabled = true;
+  }
+
+  function exitEdit() {
+    editing = false;
+    editorWrap.classList.remove('active');
+    app.style.display = '';
+    editBtn.textContent = '编辑';
+    editBtn.disabled = !token.get();
+    searchInput.disabled = false;
+  }
+
+  async function save() {
+    saveBtn.disabled = true;
+    try {
+      const res = await fetch('/api/note', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token.get()
+        },
+        body: JSON.stringify({ path: NOTE_PATH, content: editor.value })
+      });
+      if (res.status === 401) {
+        token.clear();
+        syncAuthUI();
+        throw new Error('登录已失效，请重新登录');
+      }
+      if (!res.ok) {
+        const detail = await res.json().catch(() => ({}));
+        throw new Error(detail.error || ('HTTP ' + res.status));
+      }
+      exitEdit();
+      await loadNote();
+      toast('已保存');
+    } catch (e) {
+      toast('保存失败：' + e.message);
+    } finally {
+      saveBtn.disabled = false;
+    }
+  }
+
+  async function login() {
+    loginError.textContent = '';
+    const username = usernameEl.value.trim();
+    const password = passwordEl.value;
+    if (!username || !password) {
+      loginError.textContent = '请输入用户名和密码';
+      return;
+    }
+    loginSubmit.disabled = true;
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        loginError.textContent = data.error || '登录失败';
+        return;
+      }
+      token.set(data.token);
+      loginMask.classList.remove('active');
+      passwordEl.value = '';
+      syncAuthUI();
+      toast('登录成功');
+    } catch (e) {
+      loginError.textContent = '网络错误，请重试';
+    } finally {
+      loginSubmit.disabled = false;
+    }
+  }
+
+  loginBtn.addEventListener('click', async () => {
+    if (token.get()) {
+      await fetch('/api/logout', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token.get() }
+      }).catch(() => {});
+      token.clear();
+      syncAuthUI();
+      toast('已退出登录');
+      return;
+    }
+    usernameEl.value = '';
+    passwordEl.value = '';
+    loginError.textContent = '';
+    loginMask.classList.add('active');
+    usernameEl.focus();
+  });
+
+  loginSubmit.addEventListener('click', login);
+  loginCancel.addEventListener('click', () => loginMask.classList.remove('active'));
+  passwordEl.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+  usernameEl.addEventListener('keydown', e => { if (e.key === 'Enter') passwordEl.focus(); });
+
+  editBtn.addEventListener('click', enterEdit);
+  saveBtn.addEventListener('click', save);
+  cancelBtn.addEventListener('click', () => {
+    if (editor.value !== rawMarkdown && !confirm('放弃未保存的修改？')) return;
+    exitEdit();
+  });
+
+  editor.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+      e.preventDefault();
+      save();
+    }
+  });
+
   searchInput.addEventListener('input', e => render(e.target.value));
-  render('');
+
+  syncAuthUI();
+  loadNote();
 })();
 </script>
 </body>
