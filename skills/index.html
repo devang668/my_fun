@@ -110,6 +110,41 @@
     background: #fff;
   }
   .actions a.primary { background: var(--accent); color: #fff; }
+  .registry-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .registry-head h2 { margin: 0; border: none; padding: 0; font-size: 19px; }
+  .registry-meta { font-size: 12px; color: #7a8794; }
+  .table-wrap { overflow-x: auto; }
+  .skill-row { cursor: pointer; }
+  .skill-row:hover { background: #f7f9fb; }
+  .skill-row .name { font-weight: 600; color: #22303d; }
+  .skill-row .desc {
+    color: #5a6876;
+    font-size: 13px;
+    margin-top: 3px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .skill-row.open .desc { -webkit-line-clamp: unset; display: block; }
+  .scope-tag {
+    display: inline-block;
+    font-size: 12px;
+    border-radius: 999px;
+    padding: 2px 9px;
+    background: #eef3f9;
+    color: #2f5d8c;
+    white-space: nowrap;
+  }
+  .scope-tag.global { background: #fdf1e6; color: #9a5b1f; }
+  .path-text { font-size: 12px; color: #7a8794; word-break: break-all; }
   #error { display: none; color: #b3261e; background: #fdecea; padding: 14px 18px; border-radius: 8px; }
   footer { text-align: center; color: #999; font-size: 13px; margin: 40px 0 20px; }
 </style>
@@ -127,7 +162,21 @@
 </nav>
 <main>
   <div class="card">
-    <span class="badge">已安装技能</span>
+    <span class="badge">技能登记</span>
+    <div class="registry-head">
+      <h2>已安装技能</h2>
+      <span class="registry-meta" id="registryMeta">加载中...</span>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>技能</th><th>范围</th><th>来源</th><th>安装路径</th></tr>
+        </thead>
+        <tbody id="registryBody">
+          <tr><td colspan="4">加载中...</td></tr>
+        </tbody>
+      </table>
+    </div>
     <div class="actions">
       <a class="primary" href="/self-check.html">打开自检报告</a>
       <a href="/api/note?path=.opencode%2Fskills%2Fself-check%2FSKILL.md" target="_blank">查看 SKILL.md 原文</a>
@@ -156,7 +205,60 @@
     });
   }
 
+  async function renderRegistry() {
+    const body = document.getElementById('registryBody');
+    const metaEl = document.getElementById('registryMeta');
+    try {
+      const res = await fetch('/skills/registry.json?t=' + Date.now(), { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      const skills = data.skills || [];
+      metaEl.textContent = '共 ' + skills.length + ' 个 · 更新于 ' + (data.updated_at || '-');
+      body.innerHTML = '';
+      for (const skill of skills) {
+        const tr = document.createElement('tr');
+        tr.className = 'skill-row';
+        const nameTd = document.createElement('td');
+        const nameEl = document.createElement('div');
+        nameEl.className = 'name';
+        nameEl.textContent = skill.name;
+        const descEl = document.createElement('div');
+        descEl.className = 'desc';
+        descEl.textContent = skill.description || '';
+        nameTd.appendChild(nameEl);
+        nameTd.appendChild(descEl);
+
+        const scopeTd = document.createElement('td');
+        const scope = document.createElement('span');
+        scope.className = 'scope-tag' + (skill.scope === '全局技能' ? ' global' : '');
+        scope.textContent = skill.scope;
+        scopeTd.appendChild(scope);
+
+        const sourceTd = document.createElement('td');
+        sourceTd.textContent = skill.source || '-';
+
+        const pathTd = document.createElement('td');
+        const pathEl = document.createElement('div');
+        pathEl.className = 'path-text';
+        pathEl.textContent = skill.path;
+        pathTd.appendChild(pathEl);
+
+        tr.appendChild(nameTd);
+        tr.appendChild(scopeTd);
+        tr.appendChild(sourceTd);
+        tr.appendChild(pathTd);
+        descEl.title = skill.description || '';
+        tr.addEventListener('click', () => tr.classList.toggle('open'));
+        body.appendChild(tr);
+      }
+    } catch (e) {
+      metaEl.textContent = '登记表加载失败';
+      body.innerHTML = '<tr><td colspan="4">无法加载 registry.json：' + e.message + '</td></tr>';
+    }
+  }
+
   async function boot() {
+    renderRegistry();
     try {
       const res = await fetch('/api/version?path=' + encodeURIComponent(SKILL_PATH) +
         '&t=' + Date.now(), { cache: 'no-store' });

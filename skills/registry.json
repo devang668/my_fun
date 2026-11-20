@@ -1,0 +1,106 @@
+{
+  "updated_at": "2026-11-20 04:56:48",
+  "total": 10,
+  "skills": [
+    {
+      "name": "find-skills",
+      "folder": "find-skills",
+      "scope": "项目技能",
+      "path": "/workspace/.opencode/skills/find-skills",
+      "version": "\"1.7.0\"",
+      "description": "不知道装什么技能？想让 AI 自己找到最合适的技能？技能发现·Find Skills 是场景驱动+关键词双模式的技能发现工具（skill discovery / skill finder / install skills）：用自然语言描述场景/需求（如\"我想做一个海报\"\"帮我分析股票\"\"找个薅羊毛技能\"），或明确说\"安装技能/find skills/找个skill/有没有做XX的技能\"时，自动从官方内置、本地已安装、SkillHub、虾评、GitHub、ClawHub 六层联合搜索并推荐最合适的技能，支持一键...",
+      "source": "SkillHub 官方",
+      "hasScripts": false
+    },
+    {
+      "name": "github-download",
+      "folder": "github-download",
+      "scope": "项目技能",
+      "path": "/workspace/.opencode/skills/github-download",
+      "version": "1.3.0",
+      "description": "",
+      "source": "SkillHub · @user_ab062dcd",
+      "hasScripts": true
+    },
+    {
+      "name": "self-check",
+      "folder": "self-check",
+      "scope": "项目技能",
+      "path": "/workspace/.opencode/skills/self-check",
+      "version": "",
+      "description": "Use when the user says 自检 / 服务巡检 / 检查运行中的服务 / 服务列表 / 端口检查 / self-check. Scans listening ports, probes HTTP health, updates a service manifest, writes a report page, serves it on port 8930 and returns a preview URL with downtime and token stats.",
+      "source": "本地安装",
+      "hasScripts": true
+    },
+    {
+      "name": "skillhub-preference",
+      "folder": "skillhub-preference",
+      "scope": "项目技能",
+      "path": "/workspace/.opencode/skills/skillhub-preference",
+      "version": "",
+      "description": "Prefer `skillhub` for skill discovery/install/update, then fallback to `clawhub` when unavailable or no match. Use when users ask about skills, 插件, or capability extension.",
+      "source": "SkillHub 官方",
+      "hasScripts": false
+    },
+    {
+      "name": "claude-drawing",
+      "folder": "claude-drawing",
+      "scope": "全局技能",
+      "path": "/root/.claude/skills/claude-drawing",
+      "version": "",
+      "description": "Claude 绘图 / Claude Drawing —— 不借助任何生图模型，由 Claude 用代码一笔一笔「画」出图片（程序化绘画）。内置八十三种画风：中国水墨、水彩、剪纸拼贴、韩国彩铅、日本动漫、编辑风手绘（Riso）、油画厚涂（梵高式流向笔触+颜料浮雕打光）、浮世绘木版画（晕色、木纹、墨线主版、青海波）、像素风（低分辨率+Bayer 抖动+像素字体）、黏土定格（高度图捏出的彩泥+影棚打光）、蓝晒（普鲁士蓝日光晒图，植物剪影透光）、十字绣（Aida 布十字绣+回针绣+缎面绣+法式结）、复古仪器面板（6...",
+      "source": "GitHub · cloveric/claude-drawing-skill",
+      "hasScripts": false
+    },
+    {
+      "name": "ink-wash-restyle",
+      "folder": "ink-wash-restyle",
+      "scope": "全局技能",
+      "path": "/root/.claude/skills/ink-wash-restyle",
+      "version": "1.17.0",
+      "description": "把任意照片重绘为\"行程手绘水墨感的游记画面\"——黑白水墨为底 + 克制彩色笔触（约 20%）点缀视觉中心 + 画面上叠加游记标签（画面描述·地点）与固定 朱砂印章。用户提供一张照片，skill 自动判断构图主体与配色，人物身份不漂移。",
+      "source": "GitHub · zhaimengrica-bit/ai-design-skills-ink-wash-restyle",
+      "hasScripts": true
+    },
+    {
+      "name": "procedural-painting",
+      "folder": "procedural-painting",
+      "scope": "全局技能",
+      "path": "/root/.claude/skills/procedural-painting",
+      "version": "",
+      "description": "Paint an original picture from imagination with code, no generative image model. You compose the subject yourself as a short Python script (shapes, light, colour, brush direction per mass) and a paint simulator lays it as real brush strokes with pigment mix...",
+      "source": "GitHub · dogum/procedural-art",
+      "hasScripts": true
+    },
+    {
+      "name": "procedural-realism",
+      "folder": "procedural-realism",
+      "scope": "全局技能",
+      "path": "/root/.claude/skills/procedural-realism",
+      "version": "",
+      "description": "Make photographic-style images with pure code and physics, no generative image model. Ray-marched terrain of any real mountain with physical sky, haze, shadows, snow, mist and clouds; mirror lakes; forests and villages; blue hour with a lit city or a moonli...",
+      "source": "GitHub · dogum/procedural-art",
+      "hasScripts": true
+    },
+    {
+      "name": "procedural-terrain-art",
+      "folder": "procedural-terrain-art",
+      "scope": "全局技能",
+      "path": "/root/.claude/skills/procedural-terrain-art",
+      "version": "",
+      "description": "Turn any real mountain, volcano, range, canyon or island on Earth into high-resolution procedural art from actual elevation data, in six print styles (engraved ridgelines, topographic contours, moonlit nocturne, stipple, risograph, woodcut), plus looping or...",
+      "source": "GitHub · dogum/procedural-art",
+      "hasScripts": true
+    },
+    {
+      "name": "watercolor-svg",
+      "folder": "watercolor-svg",
+      "scope": "全局技能",
+      "path": "/root/.claude/skills/watercolor-svg",
+      "version": "",
+      "description": "Use when the user wants a watercolor or painterly illustration — wet-on-wet washes, a hand-painted flower or botanical, generative/programmatic watercolor, paper-texture artwork, \"水彩\" — delivered as SVG or PNG, including matching a reference watercolor imag...",
+      "source": "GitHub · ABYR1206/watercolor-svg",
+      "hasScripts": true
+    }
+  ]
+}
