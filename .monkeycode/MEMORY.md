@@ -70,3 +70,12 @@ This file records user instructions, preferences, and teachings for reference in
   - 已确认将 SkillHub 设为优先技能安装源：技能搜索/安装/升级时优先 `skillhub`，不可用或无匹配再回退 `clawhub`，安装前先汇总来源、版本与风险供用户确认。
   - 项目技能目录为 `/workspace/.opencode/skills`，安装命令示例：`skillhub install <name> --dir /workspace/.opencode/skills`。
   - 已安装技能：`find-skills`、`skillhub-preference`（另有本地 self-check）。
+
+[Project Knowledge Summary]
+- Date: 2026-11-20
+- Context: Discovered by Agent while installing github-download skill from SkillHub
+- Category: Environment Configuration
+- Instructions:
+  - SkillHub 会按命名空间安装到 `.opencode/skills/<namespace>/<slug>`，opencode 需要扁平目录，安装后把 `<slug>` 移动到 `.opencode/skills/` 根下并删掉空命名空间目录。
+  - github-download 技能位于 `.opencode/skills/github-download/`：Linux 用 `scripts/download.sh <user/repo> [输出目录]`，技能装用 `scripts/install.sh`，Windows 用对应 `.ps1`。
+  - 该技能默认把下载结果放在当前目录，下载大仓库（>50MB）时会回退 `git clone --depth 1`。

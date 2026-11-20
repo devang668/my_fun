@@ -14,6 +14,21 @@
       "source": "community",
       "version": "1.0.0",
       "installedAt": "2026-11-20T04:39:05Z"
+    },
+    "@user_ab062dcd/github-download": {
+      "name": "GitHub 项目下载器",
+      "zip_url": "https://api.skillhub.cn/api/v1/download?slug=github-download&namespace=user_ab062dcd",
+      "source": "community",
+      "version": "1.3.0",
+      "namespace": {
+        "canonicalName": "@user_ab062dcd/github-download",
+        "displayName": "user_ab062dcd",
+        "handle": "user_ab062dcd",
+        "publicSlug": "github-download"
+      },
+      "internalSlug": "github-download",
+      "publicSlug": "github-download",
+      "installDir": "/workspace/.opencode/skills/@user_ab062dcd/github-download"
     }
   }
 }
